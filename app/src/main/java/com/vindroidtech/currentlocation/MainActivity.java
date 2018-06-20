@@ -2,6 +2,7 @@ package com.vindroidtech.currentlocation;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
@@ -19,6 +20,16 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResult;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -32,6 +43,7 @@ import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements LocationListener, View.OnClickListener {
 
+    private static final int REQUEST_CHECK_SETTINGS = 1;
     LocationManager locationManager;
     Button btnGetLocation, btnSaveLocation;
     EditText txtLatitude, txtLongitude, txtAddress, txtSpot;
@@ -40,6 +52,15 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        if (hasGPSOnDevice(this)) {
+            if (isGPSEnable(this)) {
+                Toast.makeText(this, "GPS Enable", Toast.LENGTH_LONG).show();
+            } else {
+                enableGPSSetting(this);
+            }
+        } else Toast.makeText(this, "No GPS Service to Your Device", Toast.LENGTH_LONG).show();
+
+
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
         btnGetLocation = findViewById(R.id.btnGetLocation);
@@ -216,6 +237,61 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
             }
 
         }
+    }
+
+
+    public boolean hasGPSOnDevice(Context context) {
+        LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+        if (locationManager == null) return false;
+        List<String> provider = locationManager.getAllProviders();
+        if (provider == null) return false;
+        return provider.contains(locationManager.GPS_PROVIDER);
+    }
+
+    public boolean isGPSEnable(Context context) {
+        LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+        return locationManager.isProviderEnabled(locationManager.GPS_PROVIDER);
+    }
+
+    private void enableGPSSetting(Context context) {
+        GoogleApiClient googleApiClient = new GoogleApiClient.Builder(context)
+                .addApi(LocationServices.API).build();
+        googleApiClient.connect();
+
+        LocationRequest locationRequest = LocationRequest.create();
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest.setInterval(10000);
+        locationRequest.setFastestInterval(10000 / 2);
+
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder().addLocationRequest(locationRequest);
+        builder.setAlwaysShow(true);
+
+        PendingResult<LocationSettingsResult> result = LocationServices.SettingsApi.checkLocationSettings(googleApiClient, builder.build());
+        result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
+            @Override
+            public void onResult(LocationSettingsResult result) {
+                final Status status = result.getStatus();
+                switch (status.getStatusCode()) {
+                    case LocationSettingsStatusCodes.SUCCESS:
+                        Log.i("TAGONE", "All location settings are satisfied.");
+                        break;
+                    case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                        Log.i("TAGONE", "Location settings are not satisfied. Show the user a dialog to upgrade location settings ");
+
+                        try {
+                            // Show the dialog by calling startResolutionForResult(), and check the result
+                            // in onActivityResult().
+                            status.startResolutionForResult(MainActivity.this, REQUEST_CHECK_SETTINGS);
+                        } catch (IntentSender.SendIntentException e) {
+                            Log.i("TAGONE", "PendingIntent unable to execute request.");
+                        }
+                        break;
+                    case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                        Log.i("TAGONE", "Location settings are inadequate, and cannot be fixed here. Dialog not created.");
+                        break;
+                }
+            }
+        });
     }
 
 }
