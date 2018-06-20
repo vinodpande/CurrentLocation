@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    tools:context=".MainActivity">
+
+    <TextView
+
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="Accident Spot Location!"
+        android:textSize="18sp" />
+
+    <EditText
+        android:id="@+id/txtlatitude"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:hint="Latitude"
+        android:textSize="16sp" />
+
+    <EditText
+        android:id="@+id/txtLongitude"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:hint="Longitude"
+        android:textSize="16sp" />
+
+    <EditText
+        android:id="@+id/txtAddress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:hint="Address"
+        android:inputType="textMultiLine"
+        android:textSize="16sp" />
+
+    <EditText
+        android:id="@+id/txtSpot"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:hint="Spot"
+        android:inputType="textMultiLine"
+        android:textSize="16sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnGetLocation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Get Location" />
+
+        <Button
+            android:id="@+id/btnSaveLocation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Save Location" />
+
+    </LinearLayout>
+
+</LinearLayout>
